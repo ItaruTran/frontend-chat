@@ -19,30 +19,32 @@ jobs:
         node-version: [14.x]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Get yarn cache
-      id: yarn-cache
-      run: echo "$(yarn cache dir)" && echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache Dependencies
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Cache Dependencies
-      uses: actions/cache@v2
-      with:
-        path: '**/node_modules'
-        key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+      - name: Install packages
+        run: yarn install
 
-    - name: Install packages
-      run: yarn install
+      - name: Build project
+        run: yarn build:stagging
 
-    - name: Build project
-      run: yarn build:stagging
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: yarn-dist
+          path: dist
 
   packing:
     runs-on: ubuntu-latest
@@ -52,6 +54,13 @@ jobs:
       - name: downcase REPO
         run: |
           echo "REPO=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - uses: actions/checkout@v2
+
+      - name: Download artifacts from build
+        uses: actions/download-artifact@v2
+        with:
+          name: yarn-dist
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
