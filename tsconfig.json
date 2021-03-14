@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@connector/*": ["./src/connector/*"],
+      "@config/*": ["./src/config/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@components/*": ["./src/components/*"],
+      "@t/*": ["./src/typings/*"],
+      "@api/*": ["./src/api/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "./built/**/*"
+  ],
+  "references": [],
+  "include": [
+    "**/*.js",
+    "**/*.json"
+  ]
+}
