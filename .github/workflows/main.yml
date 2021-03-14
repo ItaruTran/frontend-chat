@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: yarn-dist
-          path: dist
+          path: dist/
 
   packing:
     runs-on: ubuntu-latest
