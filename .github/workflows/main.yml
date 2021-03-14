@@ -62,6 +62,9 @@ jobs:
         with:
           name: yarn-dist
 
+      - name: test
+        run: ls . && ls dist
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
