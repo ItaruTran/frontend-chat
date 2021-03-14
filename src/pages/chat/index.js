@@ -111,7 +111,13 @@ class ChatPage extends Component {
   render() {
     const { classes, theme } = this.props
     const drawer = <ChatDrawer friends={this.state.friends} onChoose={this._onChoose} userInfo={this.props.user} />
-    const users = Object.values(this.state.friends)
+    let user
+    for (const key in this.state.friends) {
+      user = this.state.friends[key];
+      if (user.friendship_id === this.state.currentFriend) {
+        break
+      }
+    }
 
     return (
       <div className={classes.root}>
@@ -127,7 +133,7 @@ class ChatPage extends Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap>
-              {users.length > 0 ? users[0].username : ''}
+              {user ? user.username : ''}
           </Typography>
           </Toolbar>
         </AppBar>
@@ -168,7 +174,7 @@ class ChatPage extends Component {
   }
 
   _onChoose = async (currentFriend) => {
-    console.log(currentFriend);
+    console.log({currentFriend});
     this.setState({ isLoading: true })
     const messages = await chatApi.getMessages(currentFriend)
 
