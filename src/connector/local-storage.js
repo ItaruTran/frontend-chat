@@ -1,6 +1,9 @@
 export function getAccessToken() {
   return localStorage.getItem('access_token')
 }
+/**
+ * @returns {import('@t/chat').User}
+ */
 export function getUserInfo() {
   return JSON.parse(localStorage.getItem('user_info'))
 }

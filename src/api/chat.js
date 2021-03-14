@@ -81,6 +81,17 @@ class ChatApi extends BaseApi {
       body,
     })
   }
+  /**
+   * @param {number} id
+   * @returns {Promise<import('@t/chat').User>}
+   */
+  getInfo(id) {
+    return this._callApi({
+      needToken: true,
+      method: 'GET',
+      path: `/api/users/${id}`,
+    })
+  }
 }
 
 export const chatApi = new ChatApi(process.env.API_URL)

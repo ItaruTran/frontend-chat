@@ -1,22 +1,64 @@
+import { useState, Component } from 'react';
+
 import Chat from '@pages/chat';
 import Login from "@pages/login";
 import { chatApi } from '@api/chat';
-import { getAccessToken, getUserInfo, setInfo } from '@connector/local-storage';
+import { getAccessToken, getUserInfo, resetInfo, setInfo } from '@connector/local-storage';
+import Waiting from "@components/waiting";
 
-function App() {
-  const access_token = getAccessToken()
+class App extends Component {
+  state = {
+    isLoading: true,
+    success: false,
+  }
+  async componentDidMount() {
+    const access_token = getAccessToken()
+    if (access_token) {
+      chatApi.setToken(access_token)
+      try {
+        const info = await chatApi.getInfo(getUserInfo().id)
+        this.setState({
+          isLoading: false,
+          success: true,
+        })
 
-  if (access_token) {
-    chatApi.setToken(access_token)
-    return <Chat user={getUserInfo()}/>
-  } else {
-    function onLoginSuccess(username, token) {
-      setInfo(token.id, { username, id: token.userId })
-      chatApi.setToken(token)
-      window.location = '/'
+        return
+      } catch (error) {
+        resetInfo()
+      }
+    }
+    this.setState({
+      isLoading: false,
+      success: false,
+    })
+  }
+  render() {
+    if (this.state.isLoading) {
+      return <div style={{
+        height: '100vh',
+        flexGrow: 1,
+      }}>
+        <Waiting/>
+      </div>
     }
 
-    return <Login onLoginSuccess={onLoginSuccess} />
+    if (this.state.success) {
+      return <Chat user={getUserInfo()}/>
+    } else {
+      return <Login onLoginSuccess={this._onLoginSuccess} />
+    }
+  }
+
+  _onLoginSuccess = (username, token) => {
+    this.setState({
+      isLoading: true,
+      success: true,
+    })
+    setInfo(token.id, { username, id: token.userId })
+    chatApi.setToken(token.id)
+    this.setState({
+      isLoading: false,
+    })
   }
 }
 

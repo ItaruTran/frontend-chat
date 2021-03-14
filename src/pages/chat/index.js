@@ -7,7 +7,6 @@ import TextField from '@material-ui/core/TextField';
 import Fab from '@material-ui/core/Fab';
 import SendIcon from '@material-ui/icons/Send';
 import { withStyles } from '@material-ui/core/styles';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import AppBar from '@material-ui/core/AppBar';
 import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -19,6 +18,7 @@ import { chatApi } from '@api/chat';
 import { WSManager } from '@api/ws';
 import Messages from '@components/chat/messages';
 import { getAccessToken } from '@connector/local-storage';
+import Waiting from "@components/waiting";
 
 const drawerWidth = 270;
 const topbar = 9
@@ -50,6 +50,7 @@ const styles = (theme) => ({
     width: drawerWidth,
   },
   content: {
+    height: '100vh',
     flexGrow: 1,
   },
   messageArea: {
@@ -57,7 +58,6 @@ const styles = (theme) => ({
     overflowY: 'auto'
   },
   loading: {
-    height: '100vh',
     display: 'flex',
   },
 });
@@ -161,7 +161,7 @@ class ChatPage extends Component {
           </Hidden>
         </nav>
         <main className={classes.content}>
-          {this.state.isLoading ? this._loading() : this._chatUI()}
+          {this.state.isLoading ? <Waiting/> : this._chatUI()}
         </main>
       </div>
     )
@@ -183,21 +183,6 @@ class ChatPage extends Component {
     this.setState({ mobileOpen: !this.state.mobileOpen });
   };
 
-  _loading() {
-    return (
-      <Grid
-        container
-        direction="row"
-        justify="center"
-        alignItems="center"
-        className={this.props.classes.loading}
-      >
-        <Grid item>
-          <CircularProgress />
-        </Grid>
-      </Grid>
-    )
-  }
   _chatUI(props) {
     const { classes } = this.props
 
