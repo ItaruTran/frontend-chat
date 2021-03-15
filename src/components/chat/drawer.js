@@ -68,11 +68,11 @@ export default function ({ onChoose, friends, userInfo, currentFriend }) {
       >
         <DialogTitle id="alert-dialog-title">{"Do you want sign out?"}</DialogTitle>
         <DialogActions>
-          <Button onClick={() => handleClose(true)} color="secondary">
-            Agree
-          </Button>
-          <Button onClick={() => handleClose(false)} color="secondary"  autoFocus>
+          <Button onClick={() => handleClose(false)} color="secondary" variant="text" autoFocus>
             Disagree
+          </Button>
+          <Button onClick={() => handleClose(true)} color="secondary" variant="contained">
+            Agree
           </Button>
         </DialogActions>
       </Dialog>
