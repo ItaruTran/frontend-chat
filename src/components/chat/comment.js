@@ -25,14 +25,15 @@ const useStyles = makeStyles({
     whiteSpace: 'pre-line',
   },
   content: {
-    alignItems: 'left',
     maxWidth: '100%',
   },
   right: {
-    justifyContent: 'flex-end !important'
+    marginLeft: 'auto',
+    marginRight: '0px',
   },
   left: {
-    justifyContent: 'flex-start !important'
+    marginRight: 'auto',
+    marginLeft: '0px',
   },
 })
 
@@ -47,7 +48,7 @@ export default function ({ shortName, isMe, avatarColor, timestamp, text }) {
         <Typography align={align} variant="body2" color="textSecondary">{moment(timestamp).format('lll')}</Typography>
       </Grid>
       <Grid item xs={6} className={classes.content}>
-        <Paper elevation={4} style={{ backgroundColor: theme.palette.action.hover }}>
+        <Paper elevation={4} className={classes[align]} style={{ backgroundColor: theme.palette.action.hover, maxWidth: '80%', }}>
           <Typography align={align} className={classes.message}>{text}</Typography>
         </Paper>
       </Grid>

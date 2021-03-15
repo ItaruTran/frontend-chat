@@ -110,7 +110,12 @@ class ChatPage extends Component {
 
   render() {
     const { classes, theme } = this.props
-    const drawer = <ChatDrawer friends={this.state.friends} onChoose={this._onChoose} userInfo={this.props.user} />
+    const drawer = <ChatDrawer
+      friends={this.state.friends}
+      onChoose={this._onChoose}
+      userInfo={this.props.user}
+      currentFriend={this.state.currentFriend}
+    />
     let user
     for (const key in this.state.friends) {
       user = this.state.friends[key];

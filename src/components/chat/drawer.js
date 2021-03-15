@@ -10,6 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 
 import { chatApi } from '@api/chat';
 import { resetInfo } from '@connector/local-storage';
@@ -21,7 +22,7 @@ import { resetInfo } from '@connector/local-storage';
  *  userInfo: import('@t/chat').User
  * }} param0
  */
-export default function ({ onChoose, friends, userInfo }) {
+export default function ({ onChoose, friends, userInfo, currentFriend }) {
   const [open, setOpen] = useState(false)
   async function handleClose(signout) {
     if (signout) {
@@ -46,13 +47,18 @@ export default function ({ onChoose, friends, userInfo }) {
       </ListItem>
       <Divider/>
       <ListItem>
-        <ListItemText primary='Friend list'/>
+        <ListItemText>
+          <Typography variant='subtitle2'>Friend list</Typography>
+        </ListItemText>
       </ListItem>
-      {Object.values(friends).map((user, index) => (
-        <ListItem button key={index} onClick={() => onChoose(user.friendship_id)}>
-          <ListItemText secondary={user.username} />
+      {Object.values(friends).map((user, index) => {
+        const active = user.friendship_id === currentFriend
+        return <ListItem button key={index} onClick={() => onChoose(user.friendship_id)}>
+          <ListItemText >
+            <Typography color={active ? 'inherit' : "textSecondary"}>{user.username}</Typography>
+          </ListItemText>
         </ListItem>
-      ))}
+      })}
       </List>
       <Dialog
         open={open}
