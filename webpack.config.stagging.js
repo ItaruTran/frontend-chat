@@ -11,7 +11,7 @@ const config = {
   plugins: [
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production',
-      API_URL: '//itaru.duckdns.org'
+      API_URL: ''
     }),
   ],
   devtool: false,
