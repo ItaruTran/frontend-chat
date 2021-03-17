@@ -2,7 +2,10 @@
 export class BaseApi {
   constructor(baseUrl='') {
     // this._baseUrl = window.location.protocol + (baseUrl.replace('http:', '').replace('https:'))
-    this._baseUrl = baseUrl
+    if (baseUrl.length === 0)
+      this._baseUrl = window.location.origin
+    else
+      this._baseUrl = baseUrl
   }
 
   setToken(token) {
