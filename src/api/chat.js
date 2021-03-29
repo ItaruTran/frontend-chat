@@ -45,7 +45,7 @@ class ChatApi extends BaseApi {
     return this._callApi({
       needToken: true,
       method: 'GET',
-      path: `/api/friend-list`,
+      path: `/api/friendship/`,
       query: {
         filter: query,
       }
@@ -57,16 +57,17 @@ class ChatApi extends BaseApi {
    * @returns {Promise<import('@t/chat').Message[]>}
    */
   getMessages(friendship_id, offset=0) {
-    const query = JSON.stringify({
-      where: { friendship_id },
+    const query = {
+      filter: JSON.stringify({ friendship_id }),
       order: 'timestamp DESC',
       // limit: 10,
-      skip: offset,
-    })
+      offset,
+    }
     return this._callApi({
       needToken: true,
       method: 'GET',
-      path: `/api/message?filter=${encodeURIComponent(query)}`,
+      path: `/api/message/`,
+      query,
     })
   }
   /**
@@ -77,7 +78,7 @@ class ChatApi extends BaseApi {
     return this._callApi({
       needToken: true,
       method: 'POST',
-      path: '/api/message',
+      path: '/api/message/',
       body,
     })
   }
