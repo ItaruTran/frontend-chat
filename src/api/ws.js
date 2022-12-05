@@ -1,23 +1,20 @@
 import { io } from "socket.io-client";
-import { EventEmitter } from 'events';
+import { transformMessage } from "@/transform/chat";
 
-export class WSManager extends EventEmitter {
-  constructor(access_token) {
-    super()
+export default class WSManager {
+  constructor(jwt_token) {
     this._socket = io(process.env.API_URL, {
       transports: ["websocket"],
       query: {
-        access_token,
+        jwt_token,
       },
     });
-
-    this._socket.on('NewMessage', this._handleNewMessage)
   }
 
   /**
-   * @param {import('@t/chat').Message} data
+   * @param {(message: import('@t/chat').Message) => void} func
    */
-  _handleNewMessage = (data) => {
-    this.emit(`/chat/${data.friendship_id}`, data)
+  listenNewMessage = (func) => {
+    this._socket.on('NewMessage', data => func(transformMessage(data)))
   }
 }

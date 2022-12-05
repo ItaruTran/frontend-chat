@@ -1,81 +1,127 @@
-import React, { useState } from 'react';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import Divider from '@material-ui/core/Divider';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import { useEffect, useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Button from '@material-ui/core/Button';
+import Drawer from '@material-ui/core/Drawer';
+import Hidden from '@material-ui/core/Hidden';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import AppBar from '@material-ui/core/AppBar';
+import MenuIcon from '@material-ui/icons/Menu';
+import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import { chatApi } from '@api/chat';
-import { resetInfo } from '@connector/local-storage';
+import userStorage from '@/hooks/user-storage';
+import { useGroupChat } from '@/hooks/chat';
+import GroupList from './group-list';
+
+const useStyles = makeStyles((theme) => ({
+  appBar: ({ drawerWidth }) => ({
+    [theme.breakpoints.up('sm')]: {
+      width: `calc(100% - ${drawerWidth}px)`,
+      marginLeft: drawerWidth,
+    },
+  }),
+  drawer: ({ drawerWidth }) => ({
+    [theme.breakpoints.up('sm')]: {
+      width: drawerWidth,
+      flexShrink: 0,
+    },
+  }),
+  menuButton: {
+    marginRight: theme.spacing(2),
+    [theme.breakpoints.up('sm')]: {
+      display: 'none',
+    },
+  },
+  drawerPaper: ({ drawerWidth }) => ({
+    width: drawerWidth,
+  }),
+}));
+
+/**
+ * @type {{
+ * mobileOpen: boolean
+ * }}
+ */
+const defaultState = {
+  mobileOpen: false
+};
 
 /**
  * @param {{
- *  friends: any
- *  onChoose: Function
+ *  chooseGroup: (g: import('@t/chat').Group) => void
+ *  currentGroup: import('@t/chat').Group
  *  userInfo: import('@t/chat').User
+ *  drawerWidth: number
  * }} param0
  */
-export default function ({ onChoose, friends, userInfo, currentFriend }) {
-  const [open, setOpen] = useState(false)
-  async function handleClose(signout) {
-    if (signout) {
-      await chatApi.logout()
-      resetInfo()
-      window.location = '/'
-    } else {
-      setOpen(false)
-    }
+export default function ChatDrawer({ chooseGroup, userInfo, currentGroup, drawerWidth }) {
+  const theme = useTheme()
+  const classes = useStyles({ drawerWidth })
+
+  const { groups } = useGroupChat()
+  const [state, set] = useState(defaultState);
+
+  useEffect(() => {
+    if (groups) chooseGroup(groups[0])
+  }, [groups])
+
+  function _handleDrawerToggle() {
+    set(s => ({ ...s, mobileOpen: !state.mobileOpen }));
   }
 
-  return (
-    <div>
-    <List>
-      <ListItem>
-        <ListItemText primary={userInfo.username}/>
-        <ListItemSecondaryAction>
-          <IconButton edge="end" onClick={() => setOpen(true)}>
-            <ExitToAppIcon />
-          </IconButton>
-        </ListItemSecondaryAction>
-      </ListItem>
-      <Divider/>
-      <ListItem>
-        <ListItemText>
-          <Typography variant='subtitle2'>Friend list</Typography>
-        </ListItemText>
-      </ListItem>
-      {Object.values(friends).map((user, index) => {
-        const active = user.friendship_id === currentFriend
-        return <ListItem button key={index} onClick={() => onChoose(user.friendship_id)}>
-          <ListItemText >
-            <Typography color={active ? 'inherit' : "textSecondary"}>{user.username}</Typography>
-          </ListItemText>
-        </ListItem>
-      })}
-      </List>
-      <Dialog
-        open={open}
-        onClose={() => handleClose(false)}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Do you want sign out?"}</DialogTitle>
-        <DialogActions>
-          <Button onClick={() => handleClose(false)} color="secondary" variant="text" autoFocus>
-            Disagree
-          </Button>
-          <Button onClick={() => handleClose(true)} color="secondary" variant="contained">
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
+  const drawer = <GroupList
+    groups={groups}
+    onChoose={chooseGroup}
+    userInfo={userInfo}
+    currentGroup={currentGroup}
+  />
+
+  let username = currentGroup ? userStorage.getUser(currentGroup.friend_id).name : ''
+
+  return <>
+    <AppBar position="fixed" className={classes.appBar}>
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={_handleDrawerToggle}
+          className={classes.menuButton}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" noWrap>
+          {username}
+        </Typography>
+      </Toolbar>
+    </AppBar>
+    <nav className={classes.drawer} aria-label="mailbox folders">
+      <Hidden smUp implementation="css">
+        <Drawer
+          variant="temporary"
+          anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+          open={state.mobileOpen}
+          onClose={_handleDrawerToggle}
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+        >
+          {drawer}
+        </Drawer>
+      </Hidden>
+      <Hidden xsDown implementation="css">
+        <Drawer
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+          variant="permanent"
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Hidden>
+    </nav>
+  </>
 }

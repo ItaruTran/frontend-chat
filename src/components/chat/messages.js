@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Comment from '@components/chat/comment'
+import userStorage from '@/hooks/user-storage';
+import { useChatController } from '@/hooks/chat';
 
 const colors = [
   '#f37272',
@@ -10,44 +13,56 @@ const colors = [
 
 /**
  * @param {{
- *  data: import('@t/chat').Message[]
- *  currentFriend: number
- *  userId: number
+ *  messages: import('@t/chat').Message[]
+ *  userId: string
  *  messageArea: string
- *  friends: {[k: string]: import('@t/chat').User}
- *  emitter: import('events').EventEmitter
+ *  hasMore: boolean
  * }} param0
  */
-export default function Messages({ data, currentFriend, userId, messageArea, friends, emitter }) {
-  const [messages, setMessages] = useState(data)
-  const avatarColor = colors[Math.floor(Math.random() * (colors.length - 1))]
+export default function Messages({ messages, userId, messageArea, hasMore }) {
+  const avatarColor = colors[0]
+  const c = useChatController()
 
-  useEffect(() => {
-    function update(message) {
-      setMessages(messages => {
-        return [message, ...messages]
-      })
-    }
-    emitter.on(`/chat/${currentFriend}`, update)
+  return <List
+    className={messageArea}
+    id="scrollableDiv"
+    style={{
+      overflow: 'auto',
+      display: 'flex',
+      flexDirection: 'column-reverse',
+    }}
+  >
+    <InfiniteScroll
+      dataLength={messages.length}
+      next={c.loadMore}
+      style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+      inverse={true}
+      hasMore={hasMore}
+      loader={
+        <div style={{ width: '100%', height: '50px', display: 'flex' }}>
+          <CircularProgress style={{ margin: 'auto' }} />
+        </div>
+      }
+      scrollableTarget="scrollableDiv"
+    >
+      {messages.map((message, index) => {
+        const isMe = message.sender_id === userId
 
-    return () => {
-      emitter.removeListener(`/chat/${currentFriend}`, update)
-    }
-  })
+        let shortName = ''
+        if (!isMe) {
+          shortName = userStorage.getUser(message.sender_id)?.name.substring(0, 2)
+        }
 
-  return <List className={messageArea}>
-    {messages.map((message, index) => {
-      const isMe = message.sender_id===userId
-      return (<ListItem key={`comment-${index}`}>
-        <Comment
-          key={`comment-${index}`}
-          timestamp={message.timestamp}
-          text={message.content}
-          isMe={isMe}
-          avatarColor={avatarColor}
-          shortName={!isMe ? friends[message.sender_id].username.substring(0, 2) : ''}
-        />
-      </ListItem>)
-    }).reverse()}
+        return (<ListItem id={`comment-${message.id}`} key={`comment-${message.id}`}>
+          <Comment
+            timestamp={message.timestamp}
+            text={message.content}
+            isMe={isMe}
+            avatarColor={avatarColor}
+            shortName={shortName}
+          />
+        </ListItem>)
+      })}
+    </InfiniteScroll>
   </List>
 }

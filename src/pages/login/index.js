@@ -33,8 +33,8 @@ const useStyles = makeStyles((theme) => ({
 export default function SignIn({onLoginSuccess}) {
   const classes = useStyles();
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setUsername] = useState('');
+  // const [password, setPassword] = useState('');
   const [fail, setFail] = useState(false)
 
   async function handleSubmit(event) {
@@ -43,12 +43,12 @@ export default function SignIn({onLoginSuccess}) {
     }
 
     try {
-      const token = await chatApi.login({username, password})
-      onLoginSuccess(username, token)
+      const token = await chatApi.login({ name })
+      onLoginSuccess(name, token)
     } catch (error) {
       console.error(error);
       setUsername('')
-      setPassword('')
+      // setPassword('')
       setFail(true)
     }
   }
@@ -75,10 +75,10 @@ export default function SignIn({onLoginSuccess}) {
             autoComplete="username"
             autoFocus
             error={fail}
-            value={username}
+            value={name}
             onInput={e => setUsername(e.target.value)}
           />
-          <TextField
+          {/* <TextField
             variant="outlined"
             margin="normal"
             required
@@ -96,7 +96,7 @@ export default function SignIn({onLoginSuccess}) {
             error={fail}
             value={password}
             onInput={e => setPassword(e.target.value)}
-          />
+          /> */}
           {fail
             ? <Typography variant="subtitle2" align="center">Wrong username or password</Typography>
             : <div/>

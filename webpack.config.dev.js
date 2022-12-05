@@ -12,7 +12,7 @@ const config = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
-      API_URL: ''
+      API_URL: 'http://localhost:3000'
     }),
     // new ReactRefreshWebpackPlugin(),
   ],

@@ -4,7 +4,12 @@
     "allowJs": true,
     "moduleResolution": "node",
     "baseUrl": ".",
+    "target": "ES2021",
+    "checkJs": true,
+    "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
     "paths": {
+      "@/*": ["./src/*"],
       "@connector/*": ["./src/connector/*"],
       "@config/*": ["./src/config/*"],
       "@pages/*": ["./src/pages/*"],

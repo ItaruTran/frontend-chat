@@ -1,3 +1,4 @@
+import { stringify } from 'qs';
 
 export class BaseApi {
   constructor(baseUrl='') {
@@ -18,7 +19,7 @@ export class BaseApi {
    *   path: string
    *   body?: any
    *   needToken?: boolean
-   *   query: {[k: string]: string|number}
+   *   query?: {[k: string]: any}
    * }} param0
    * @returns {Promise<any>}
    */
@@ -26,16 +27,17 @@ export class BaseApi {
     const headers = {
       'Content-Type': 'application/json',
     }
-    const url = new URL(this._baseUrl + path)
+
+    let queryStr = '';
     if (query) {
-      for (const key in query) {
-        url.searchParams.set(key, query[key])
-      }
+      queryStr = '?' + stringify(query)
     }
+
+    const url = new URL(this._baseUrl + path + queryStr)
 
     if (needToken)
       // url.searchParams.set('access_token', this._token)
-      headers['authorization'] = this._token
+      headers['authorization'] = `Bearer ${this._token}`
 
     const res = await fetch(url, {
       method,
@@ -43,15 +45,20 @@ export class BaseApi {
       headers,
     })
 
-    if (!res.ok) {
-      throw new Error(`${res.status}`)
-    }
+    // if (!res.ok) {
+    //   throw new Error(`${res.status}`)
+    // }
 
     if (res.status === 204)
       return
 
-    if (res.headers.get('content-type').indexOf('application/json') !== -1)
-      return res.json()
+    if (res.headers.get('content-type').indexOf('application/json') !== -1) {
+      const data = await res.json()
+      if (data.success)
+        return data.data
+
+      throw data
+    }
     else
       return res.body
   }

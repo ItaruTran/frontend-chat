@@ -1,23 +1,32 @@
-import { useState, Component } from 'react';
+import { Component } from 'react';
 
 import Chat from '@pages/chat';
 import Login from "@pages/login";
 import { chatApi } from '@api/chat';
 import { getAccessToken, getUserInfo, resetInfo, setInfo } from '@connector/local-storage';
 import Waiting from "@components/waiting";
+import { groupController } from './hooks/chat';
 
 class App extends Component {
   state = {
+    user: null,
     isLoading: true,
     success: false,
   }
   async componentDidMount() {
     const access_token = getAccessToken()
+    let user = getUserInfo();
+
     if (access_token) {
       chatApi.setToken(access_token)
       try {
-        const info = await chatApi.getInfo(getUserInfo().id)
+
+        [user] = await chatApi.getUserInfo([user.id])
+
+        await groupController.init(access_token, user)
+
         this.setState({
+          user,
           isLoading: false,
           success: true,
         })
@@ -27,6 +36,7 @@ class App extends Component {
         resetInfo()
       }
     }
+
     this.setState({
       isLoading: false,
       success: false,
@@ -43,21 +53,22 @@ class App extends Component {
     }
 
     if (this.state.success) {
-      return <Chat user={getUserInfo()}/>
+      return <Chat user={this.state.user} />
     } else {
       return <Login onLoginSuccess={this._onLoginSuccess} />
     }
   }
 
-  _onLoginSuccess = (username, token) => {
+  _onLoginSuccess = async (username, info) => {
+    setInfo(info.token, info)
+    chatApi.setToken(info.token)
+
+    await groupController.init(info.token, info)
+
     this.setState({
-      isLoading: true,
-      success: true,
-    })
-    setInfo(token.id, { username, id: token.userId })
-    chatApi.setToken(token.id)
-    this.setState({
+      user: info,
       isLoading: false,
+      success: true,
     })
   }
 }

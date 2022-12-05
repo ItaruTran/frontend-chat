@@ -16,6 +16,7 @@ module.exports = {
     modules: ['node_modules', './src'],
     extensions: ['.js', '.jsx'],
     alias: {
+      "@": path.resolve(__dirname, "src/"),
       "@connector": path.resolve(__dirname, "src/connector/"),
       "@components": path.resolve(__dirname, "src/components/"),
       "@api": path.resolve(__dirname, "src/api/"),
@@ -45,6 +46,6 @@ module.exports = {
     splitChunks: { chunks: "all" }
   },
   devServer: {
-    port: 5000,
+    port: 5555,
   }
 };

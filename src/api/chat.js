@@ -1,74 +1,63 @@
+import { transformGroup, transformMessage } from "@/transform/chat";
 import { BaseApi } from "./base";
 
 class ChatApi extends BaseApi {
   /**
    * @param {{
-   *  username: string
-   *  password: string
+   *  name: string
+   *  password?: string
    * }} data
-   * @returns {Promise<import('@t/chat').AccessToken>}
+   * @returns {Promise<import('@t/chat').AuthUser>}
    */
   login(data) {
     return this._callApi({
       method: 'POST',
-      path: '/api/users/login',
+      path: '/api/users',
       body: data,
     })
   }
-  logout() {
-    return this._callApi({
-      needToken: true,
-      method: 'POST',
-      path: '/api/users/logout',
-    })
-  }
   /**
-   * @returns {Promise<import('@t/chat').FriendList[]>}
+   * @param {string[]} ids
+   * @returns {Promise<import('@t/chat').User[]>}
    */
-  getFriendList() {
-    const query = JSON.stringify({
-      include: [
-        {
-          relation: 'user1',
-          scope: {
-            fields: ['username']
-          },
-        },
-        {
-          relation: 'user2',
-          scope: {
-            fields: ['username']
-          },
-        },
-      ]
-    })
+  getUserInfo(ids) {
     return this._callApi({
       needToken: true,
       method: 'GET',
-      path: `/api/friendship/`,
-      query: {
-        filter: query,
-      }
+      query: { ids },
+      path: `/api/users`,
     })
   }
+
   /**
-   * @param {number} friendship_id
-   * @param {number} offset
+   * @param {number} group_id
+   * @param {{
+   * offset?: number
+   * limit?: number
+   * after_time?: Date
+   * before_time?: Date
+   * }} opts
    * @returns {Promise<import('@t/chat').Message[]>}
    */
-  getMessages(friendship_id, offset=0) {
+  async getMessages(group_id, { offset=0, limit=15, after_time, before_time }) {
     const query = {
-      filter: JSON.stringify({ friendship_id }),
+      filter: JSON.stringify({ group_id }),
       order: 'timestamp DESC',
-      // limit: 10,
+      limit,
       offset,
+      after_time,
+      before_time,
     }
-    return this._callApi({
+    const result = await this._callApi({
       needToken: true,
       method: 'GET',
-      path: `/api/message/`,
-      query,
-    })
+      path: `/api/message`,
+      query
+    });
+
+    return result.map(
+      m => transformMessage(m)
+    )
   }
   /**
    * @param {import('@t/chat').MessageInput} body
@@ -78,19 +67,41 @@ class ChatApi extends BaseApi {
     return this._callApi({
       needToken: true,
       method: 'POST',
-      path: '/api/message/',
+      path: '/api/message',
       body,
     })
   }
+
   /**
-   * @param {number} id
-   * @returns {Promise<import('@t/chat').User>}
+   * @returns {Promise<import('@t/chat').Group[]>}
    */
-  getInfo(id) {
-    return this._callApi({
+  async getGroup({ offset=0, limit=15, userId }) {
+    const result = await this._callApi({
       needToken: true,
       method: 'GET',
-      path: `/api/users/${id}`,
+      path: `/api/group-chat`,
+      query: {
+        order: 'last_message_time DESC',
+        offset,
+        limit
+      }
+    });
+
+    return result.map(
+      g => transformGroup(userId, g)
+    )
+  }
+
+  /**
+   * @param {import('@t/chat').GroupInput} body
+   * @returns {Promise<import('@t/chat').Group>}
+   */
+  createChat(body) {
+    return this._callApi({
+      needToken: true,
+      method: 'POST',
+      path: '/api/message',
+      body,
     })
   }
 }

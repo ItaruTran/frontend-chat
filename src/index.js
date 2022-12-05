@@ -1,7 +1,7 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 
-import React from 'react';
+import { StrictMode, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -11,9 +11,9 @@ import App from './app'
 
 const render = () => {
   ReactDOM.render(
-    <React.StrictMode>
+    <StrictMode>
       <Root />
-    </React.StrictMode>,
+    </StrictMode>,
     document.getElementById('root')
   );
 };
@@ -21,7 +21,7 @@ const render = () => {
 function Root() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const theme = React.useMemo(
+  const theme = useMemo(
     () =>
       createMuiTheme({
         palette: {

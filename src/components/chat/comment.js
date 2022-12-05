@@ -1,6 +1,5 @@
 import { makeStyles, useTheme } from '@material-ui/core';
 import Grid from '@material-ui/core/Grid';
-import List from '@material-ui/core/List';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
