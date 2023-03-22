@@ -53,8 +53,10 @@ export default class GroupController {
       userId: this._user.id,
     })
 
-    const users = groups.map(g => g.friend_id)
-    await userStorage.addUser(users)
+    if(groups.length > 0){
+      const users = groups.map(g => g.friend_id)
+      await userStorage.addUser(users)
+    }
 
     this._groups = groups
     this._setGroups && this._setGroups({ loading: false, groups })
@@ -73,19 +75,19 @@ export default class GroupController {
    * @param {import('@t/chat').Message} message
    */
   _handleNewMessage = (message) => {
-    this._groups = this._groups.filter((g, i) => {
-      if (g.id === this._currentGroup.id) {
-        return false
-      } else
-        return true
-    })
+    // this._groups = this._groups.filter((g, i) => {
+    //   if (g.id === this._currentGroup.id) {
+    //     return false
+    //   } else
+    //     return true
+    // })
 
-    this._groups.unshift({
-      ...this._currentGroup,
-      last_message_time: message.timestamp
-    })
+    // this._groups.unshift({
+    //   ...this._currentGroup,
+    //   last_message_time: message.timestamp
+    // })
 
-    this._setGroups({ groups: this._groups, loading: false })
+    // this._setGroups({ groups: this._groups, loading: false })
 
     if (message.group_id === this._currentGroup.id) {
       this._addNewMessage(message)
